@@ -1,0 +1,14 @@
+name: lockerai-reranking
+services:
+  app:
+    container_name: lockerai-reranking-app
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.development
+    volumes:
+      - type: bind
+        source: ../
+        target: /workspaces/lockerai-reranking/
+    environment:
+      PROJECT_DIR: /workspaces/lockerai-reranking/
+    tty: true

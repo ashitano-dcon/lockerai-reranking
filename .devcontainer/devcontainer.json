@@ -1,0 +1,19 @@
+{
+  "name": "lockerai-reranking",
+  "workspaceFolder": "/workspaces/lockerai-reranking/",
+  "dockerComposeFile": ["../docker/compose.development.yaml"],
+  "service": "app",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "tamasfe.even-better-toml",
+        "visualstudioexptTeam.vscodeintellicode"
+      ]
+    }
+  }
+}

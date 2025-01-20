@@ -1,0 +1,25 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "python.analysis.exclude": [
+    "**/__pycache__/",
+    "**/.mypy_cache/",
+    "**/.ruff_cache/",
+    "**/.venv/",
+    "**/*.egg-info/",
+    "**/build/",
+    "**/dist/",
+    "**/out/",
+    "**/*log/*"
+  ],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.defaultInterpreterPath": "./.venv/bin/python",
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
+}
