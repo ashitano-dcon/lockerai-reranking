@@ -35,8 +35,6 @@ class TextPairWithScalarDataset(Dataset):
         encoding = self.tokenizer(
             text1,
             text2,
-            add_special_tokens=True,
-            return_attention_mask=True,
             return_tensors="pt",
         )
 
