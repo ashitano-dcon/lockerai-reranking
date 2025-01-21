@@ -2,8 +2,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import evaluate
 import huggingface_hub
 import hydra
+import numpy as np
 import torch
 import wandb
 import wandb.util
@@ -12,6 +14,7 @@ from dotenv import load_dotenv
 from omegaconf import OmegaConf
 from transformers import (
     AutoTokenizer,
+    EvalPrediction,
     PreTrainedTokenizer,
     PreTrainedTokenizerFast,
     Trainer,
@@ -82,6 +85,22 @@ def train(
     train_dataset: dict[str, IterableDataset] | IterableDataset | Dataset | DatasetDict,
     eval_dataset: dict[str, IterableDataset] | IterableDataset | Dataset | DatasetDict,
 ) -> None:
+    def compute_metrics(eval_pred: EvalPrediction) -> dict[str, float]:
+        logits, labels = eval_pred
+        predictions = np.argmax(logits, axis=1)
+
+        precision_evaluator = evaluate.load("precision")
+        recall_evaluator = evaluate.load("recall")
+        f1_evaluator = evaluate.load("f1")
+        accuracy_evaluator = evaluate.load("accuracy")
+
+        return {
+            "precision": precision_evaluator.compute(predictions=predictions, references=labels)["precision"],  # type: ignore  # noqa: PGH003
+            "recall": recall_evaluator.compute(predictions=predictions, references=labels)["recall"],  # type: ignore  # noqa: PGH003
+            "f1": f1_evaluator.compute(predictions=predictions, references=labels)["f1"],  # type: ignore  # noqa: PGH003
+            "accuracy": accuracy_evaluator.compute(predictions=predictions, references=labels)["accuracy"],  # type: ignore  # noqa: PGH003
+        }
+
     training_args = TrainingArguments(
         output_dir=cfg.model.save_dir,
         num_train_epochs=cfg.train.num_epochs,
@@ -109,7 +128,7 @@ def train(
         bf16_full_eval=True,
         group_by_length=True,
         prediction_loss_only=True,
-        metric_for_best_model="eval_loss",
+        metric_for_best_model="f1",
         load_best_model_at_end=True,
         report_to="wandb",
     )
@@ -119,6 +138,7 @@ def train(
         args=training_args,
         train_dataset=train_dataset,  # type: ignore  # noqa: PGH003
         eval_dataset=eval_dataset,  # type: ignore  # noqa: PGH003
+        compute_metrics=compute_metrics,
     )
 
     wandb.init(project=cfg.wandb.project)
