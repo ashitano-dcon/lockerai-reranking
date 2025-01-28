@@ -154,9 +154,9 @@ class ModernBertForSequenceClassificationWithScalar(ModernBertPreTrainedModel):
         if scalar is not None:
             if scalar.dim() == 1:
                 scalar = scalar.unsqueeze(-1)
-            pooled_output = torch.cat([pooled_output, scalar], dim=1)
+            pooled_output_with_scalar = torch.cat([pooled_output, scalar], dim=1)
 
-        logits = self.classifier(pooled_output)
+        logits = self.classifier(pooled_output_with_scalar)
 
         loss = None
         if labels is not None:

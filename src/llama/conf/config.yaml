@@ -1,0 +1,43 @@
+project_name: lockerai-reranking
+project_dir: ${oc.env:PROJECT_DIR}
+
+model:
+  name: ashitano-dcon/lockerai-reranking-llama
+  base_name: princeton-nlp/Sheared-LLaMA-2.7B
+  save_dir: ${project_dir}/checkpoints/${model.name}
+  classifier_pooling: mean
+
+train:
+  split: train
+  num_epochs: 3
+  learning_rate: 5e-5
+  batch_size_per_device: 16
+  gradient_accumulation_steps: 1
+  gradient_checkpointing: True
+  max_grad_norm: 1.0
+  optim: adamw_torch
+  weight_decay: 0.0
+  scheduler: linear
+  warmup_steps: 0
+  warmup_ratio: 0.0
+
+eval:
+  split: test
+  batch_size_per_device: 16
+  gradient_accumulation_steps: 1
+
+huggingface:
+  token: ${oc.env:HF_TOKEN}
+
+wandb:
+  project: ${oc.env:WANDB_PROJECT}
+  key: ${oc.env:WANDB_API_KEY}
+
+hydra:
+  run:
+    dir: ${project_dir}/logs/${project_name}/${hydra.job.name}/${now:%Y-%m-%d-%H:%M:%S}
+  sweep:
+    dir: ${hydra.run.dir}
+  job:
+    chdir: False
+  verbose: INFO

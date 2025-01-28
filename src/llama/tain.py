@@ -22,7 +22,7 @@ from transformers import (
 )
 
 from .dataset import TextPairWithScalarDataset
-from .modeling import ModernBertForSequenceClassificationWithScalar
+from .modeling import LlamaForSequenceClassificationWithScalar
 
 load_dotenv()
 
@@ -39,9 +39,10 @@ def main(cfg: Any) -> None:
 
     Path(cfg.model.save_dir).mkdir(exist_ok=True, parents=True)
 
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model.base_name)
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model.base_name, padding_side="right")
+    tokenizer.pad_token = tokenizer.unk_token
 
-    model = ModernBertForSequenceClassificationWithScalar.from_pretrained(
+    model = LlamaForSequenceClassificationWithScalar.from_pretrained(
         cfg.model.base_name,
         device_map="auto",
         torch_dtype=torch.bfloat16,
@@ -80,7 +81,7 @@ def main(cfg: Any) -> None:
 def train(
     cfg: Any,
     tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast,
-    model: ModernBertForSequenceClassificationWithScalar,
+    model: LlamaForSequenceClassificationWithScalar,
     train_dataset: dict[str, IterableDataset] | IterableDataset | Dataset | DatasetDict,
     eval_dataset: dict[str, IterableDataset] | IterableDataset | Dataset | DatasetDict,
 ) -> None:
