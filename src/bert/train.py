@@ -45,7 +45,6 @@ def main(cfg: Any) -> None:
         cfg.model.base_name,
         device_map="auto",
         torch_dtype=torch.bfloat16,
-        use_cache=False,
         attn_implementation="flash_attention_2",
         num_labels=2,
         classifier_pooling=cfg.model.classifier_pooling,
