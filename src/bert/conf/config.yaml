@@ -10,16 +10,13 @@ model:
 train:
   split: train
   num_epochs: 3
-  learning_rate: 5e-5
+  learning_rate: 2e-6
   batch_size_per_device: 16
   gradient_accumulation_steps: 1
   gradient_checkpointing: True
   max_grad_norm: 1.0
-  optim: adamw_torch
-  weight_decay: 0.0
-  scheduler: linear
-  warmup_steps: 0
-  warmup_ratio: 0.0
+  optim: schedule_free_radam
+  lr_scheduler_type: constant
 
 eval:
   split: test
