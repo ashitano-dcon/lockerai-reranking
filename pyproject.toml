@@ -23,7 +23,7 @@ dependencies = [
   "wandb==0.19.10",
 ]
 readme = "README.md"
-requires-python = "~=3.12"
+requires-python = "~=3.11"
 
 [tool.rye]
 managed = true
