@@ -50,20 +50,20 @@ def main(cfg: Any) -> None:
         classifier_pooling=cfg.model.classifier_pooling,
     )
 
-    train_dataset = Dataset.from_json("./lost-item-similarity-dataset/train.jsonl")
+    train_dataset = Dataset.from_json("./data/lost-item-similarity-dataset/train.jsonl")
     train_dataset = TextPairWithScalarDataset(
-        train_dataset["text1"],  # type: ignore  # noqa: PGH003
-        train_dataset["text2"],  # type: ignore  # noqa: PGH003
-        train_dataset["label"],  # type: ignore  # noqa: PGH003
-        train_dataset["scalar"],  # type: ignore  # noqa: PGH003
+        train_dataset["description"],  # type: ignore  # noqa: PGH003
+        train_dataset["inquiry"],  # type: ignore  # noqa: PGH003
+        [1 if matched else 0 for matched in train_dataset["matched"]],  # type: ignore  # noqa: PGH003
+        train_dataset["latency"],  # type: ignore  # noqa: PGH003
         tokenizer,
     )
-    eval_dataset = Dataset.from_json("./lost-item-similarity-dataset/test.jsonl")
+    eval_dataset = Dataset.from_json("./data/lost-item-similarity-dataset/test.jsonl")
     eval_dataset = TextPairWithScalarDataset(
-        eval_dataset["text1"],  # type: ignore  # noqa: PGH003
-        eval_dataset["text2"],  # type: ignore  # noqa: PGH003
-        eval_dataset["label"],  # type: ignore  # noqa: PGH003
-        eval_dataset["scalar"],  # type: ignore  # noqa: PGH003
+        eval_dataset["description"],  # type: ignore  # noqa: PGH003
+        eval_dataset["inquiry"],  # type: ignore  # noqa: PGH003
+        [1 if matched else 0 for matched in eval_dataset["matched"]],  # type: ignore  # noqa: PGH003
+        eval_dataset["latency"],  # type: ignore  # noqa: PGH003
         tokenizer,
     )
 
@@ -109,10 +109,7 @@ def train(
         gradient_checkpointing_kwargs={"use_reentrant": False},
         max_grad_norm=cfg.train.max_grad_norm,
         optim=cfg.train.optim,
-        weight_decay=cfg.train.weight_decay,
-        lr_scheduler_type=cfg.train.scheduler,
-        warmup_steps=cfg.train.warmup_steps,
-        warmup_ratio=cfg.train.warmup_ratio,
+        lr_scheduler_type=cfg.train.lr_scheduler_type,
         save_strategy="steps",
         save_steps=100,
         eval_strategy="steps",
