@@ -10,13 +10,13 @@
 #   universal: false
 
 -e file:.
-accelerate==1.3.0
+accelerate==1.6.0
     # via lockerai-reranking
     # via peft
     # via trl
-aiohappyeyeballs==2.4.4
+aiohappyeyeballs==2.4.6
     # via aiohttp
-aiohttp==3.11.11
+aiohttp==3.11.12
     # via datasets
     # via fsspec
 aiosignal==1.3.2
@@ -26,20 +26,20 @@ annotated-types==0.7.0
 antlr4-python3-runtime==4.9.3
     # via hydra-core
     # via omegaconf
-attrs==24.3.0
+attrs==25.1.0
     # via aiohttp
-certifi==2024.12.14
+certifi==2025.1.31
     # via requests
     # via sentry-sdk
 charset-normalizer==3.4.1
     # via requests
 click==8.1.8
     # via wandb
-datasets==3.2.0
+datasets==3.5.1
     # via evaluate
     # via lockerai-reranking
     # via trl
-deepspeed==0.16.2
+deepspeed==0.16.7
     # via lockerai-reranking
 dill==0.3.8
     # via datasets
@@ -47,11 +47,11 @@ dill==0.3.8
     # via multiprocess
 docker-pycreds==0.4.0
     # via wandb
-einops==0.8.0
+einops==0.8.1
     # via deepspeed
 evaluate==0.4.3
     # via lockerai-reranking
-filelock==3.16.1
+filelock==3.17.0
     # via datasets
     # via huggingface-hub
     # via torch
@@ -70,7 +70,7 @@ gitpython==3.1.44
     # via wandb
 hjson==3.1.0
     # via deepspeed
-huggingface-hub==0.27.1
+huggingface-hub==0.30.2
     # via accelerate
     # via datasets
     # via evaluate
@@ -85,7 +85,7 @@ idna==3.10
     # via yarl
 jinja2==3.1.5
     # via torch
-lefthook==1.10.0
+lefthook==1.11.12
 markdown-it-py==3.0.0
     # via rich
 markupsafe==3.0.2
@@ -129,7 +129,7 @@ packaging==24.2
 pandas==2.2.3
     # via datasets
     # via evaluate
-peft==0.14.0
+peft==0.15.2
     # via lockerai-reranking
 platformdirs==4.3.6
     # via wandb
@@ -147,7 +147,7 @@ py-cpuinfo==9.0.0
     # via deepspeed
 pyarrow==19.0.0
     # via datasets
-pydantic==2.10.5
+pydantic==2.10.6
     # via deepspeed
     # via wandb
 pydantic-core==2.27.2
@@ -156,9 +156,9 @@ pygments==2.19.1
     # via rich
 python-dateutil==2.9.0.post0
     # via pandas
-python-dotenv==1.0.1
+python-dotenv==1.1.0
     # via lockerai-reranking
-pytz==2024.2
+pytz==2025.1
     # via pandas
 pyyaml==6.0.2
     # via accelerate
@@ -178,11 +178,13 @@ requests==2.32.3
     # via wandb
 rich==13.9.4
     # via trl
-ruff==0.8.4
+ruff==0.11.7
 safetensors==0.5.2
     # via accelerate
     # via peft
     # via transformers
+schedulefree==1.4.1
+    # via lockerai-reranking
 sentry-sdk==2.20.0
     # via wandb
 setproctitle==1.3.4
@@ -195,15 +197,16 @@ six==1.17.0
     # via python-dateutil
 smmap==5.0.2
     # via gitdb
-sympy==1.13.1
+sympy==1.14.0
     # via torch
 tokenizers==0.21.0
     # via transformers
-torch==2.5.1
+torch==2.7.0
     # via accelerate
     # via deepspeed
     # via lockerai-reranking
     # via peft
+    # via schedulefree
 tqdm==4.67.1
     # via datasets
     # via deepspeed
@@ -212,23 +215,25 @@ tqdm==4.67.1
     # via lockerai-reranking
     # via peft
     # via transformers
-transformers==4.48.0
+transformers==4.51.3
     # via lockerai-reranking
     # via peft
     # via trl
-trl==0.13.0
+trl==0.17.0
     # via lockerai-reranking
 typing-extensions==4.12.2
     # via huggingface-hub
     # via pydantic
     # via pydantic-core
+    # via schedulefree
     # via torch
-tzdata==2024.2
+    # via wandb
+tzdata==2025.1
     # via pandas
 urllib3==2.3.0
     # via requests
     # via sentry-sdk
-wandb==0.19.4
+wandb==0.19.10
     # via lockerai-reranking
 xxhash==3.5.0
     # via datasets
