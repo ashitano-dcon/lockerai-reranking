@@ -11,11 +11,13 @@ data/
 
 # debug
 *log*
+wandb/
 
 # deliverable
 build/
 dist/
 out/
+output/
 
 # dependency
 .venv/
