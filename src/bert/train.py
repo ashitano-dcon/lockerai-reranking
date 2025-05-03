@@ -46,7 +46,7 @@ def main(cfg: Any) -> None:
         cfg.model.base_name,
         device_map="auto",
         torch_dtype=torch.bfloat16,
-        attn_implementation=cfg.train.attn_implementation,
+        attn_implementation=None if cfg.train.attn_implementation is None else cfg.train.attn_implementation,
         num_labels=2,
         classifier_pooling=cfg.model.classifier_pooling,
     )
