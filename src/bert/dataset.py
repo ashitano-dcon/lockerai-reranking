@@ -1,46 +1,45 @@
+import json
+from pathlib import Path
 from typing import Any
 
 import torch
 from datasets import Dataset
-from transformers import (
-    PreTrainedTokenizer,
-    PreTrainedTokenizerFast,
-)
+from transformers import AutoTokenizer
 
 
-class TextPairWithScalarDataset(Dataset):
-    def __init__(
-        self,
-        text1s: Any,
-        text2s: Any,
-        labels: Any,
-        scalars: Any,
-        tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast,
-    ) -> None:
-        self.text1s = text1s
-        self.text2s = text2s
-        self.labels = labels
-        self.scalars = scalars
+class LostItemSimilarityDataset(Dataset):
+    def __init__(self, file_path: str, tokenizer: AutoTokenizer, max_length: int) -> None:
+        self.samples = []
         self.tokenizer = tokenizer
+        self.max_length = max_length
+
+        # JSONL を読み込む
+        with Path.open(file_path, encoding="utf-8") as f:
+            for line in f:
+                data = json.loads(line)
+                self.samples.append(data)
 
     def __len__(self) -> int:
-        return len(self.text1s)
+        return len(self.samples)
 
     def __getitem__(self, idx: Any) -> dict[str, Any]:
-        text1 = self.text1s[idx]
-        text2 = self.text2s[idx]
-        scalar = self.scalars[idx]
-        label = self.labels[idx]
+        item = self.samples[idx]
 
+        text = item["description"] + self.tokenizer.sep_token + item["inquiry"]
         encoding = self.tokenizer(
-            text1,
-            text2,
-            return_tensors="pt",
+            text,
+            truncation=True,
+            max_length=self.max_length,
+            padding="do_not_pad",
+            return_tensors=None,
         )
 
+        label = 1 if item.get("matched", False) else 0
+        scalar = float(item.get("latency", 0.0))
+
         return {
-            "input_ids": encoding["input_ids"].squeeze(0),  # type: ignore  # noqa: PGH003
-            "attention_mask": encoding["attention_mask"].squeeze(0),  # type: ignore  # noqa: PGH003
-            "scalar": torch.tensor(scalar, dtype=torch.float),
-            "labels": torch.tensor(label, dtype=torch.int),
+            "input_ids": torch.tensor(encoding["input_ids"], dtype=torch.long),
+            "attention_mask": torch.tensor(encoding["attention_mask"], dtype=torch.long),
+            "scalar": torch.tensor([scalar], dtype=torch.float),
+            "labels": torch.tensor(label, dtype=torch.long),
         }

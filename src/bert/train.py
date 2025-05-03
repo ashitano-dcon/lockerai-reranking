@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from omegaconf import OmegaConf
 from transformers import (
     AutoTokenizer,
+    DataCollatorWithPadding,
     EvalPrediction,
     PreTrainedTokenizer,
     PreTrainedTokenizerFast,
@@ -21,7 +22,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from .dataset import TextPairWithScalarDataset
+from .dataset import LostItemSimilarityDataset
 from .modeling import ModernBertForSequenceClassificationWithScalar
 
 load_dotenv()
@@ -45,27 +46,25 @@ def main(cfg: Any) -> None:
         cfg.model.base_name,
         device_map="auto",
         torch_dtype=torch.bfloat16,
-        attn_implementation="flash_attention_2",
+        attn_implementation=cfg.train.attn_implementation,
         num_labels=2,
         classifier_pooling=cfg.model.classifier_pooling,
     )
+    model.classifier.reset_parameters()
 
-    train_dataset = Dataset.from_json("./data/lost-item-similarity-dataset/train.jsonl")
-    train_dataset = TextPairWithScalarDataset(
-        train_dataset["description"],  # type: ignore  # noqa: PGH003
-        train_dataset["inquiry"],  # type: ignore  # noqa: PGH003
-        [1 if matched else 0 for matched in train_dataset["matched"]],  # type: ignore  # noqa: PGH003
-        train_dataset["latency"],  # type: ignore  # noqa: PGH003
-        tokenizer,
+    train_dataset = LostItemSimilarityDataset(
+        file_path="./data/lost-item-similarity-dataset/train.jsonl",
+        tokenizer=tokenizer,
+        max_length=model.config.max_position_embeddings,
     )
-    eval_dataset = Dataset.from_json("./data/lost-item-similarity-dataset/test.jsonl")
-    eval_dataset = TextPairWithScalarDataset(
-        eval_dataset["description"],  # type: ignore  # noqa: PGH003
-        eval_dataset["inquiry"],  # type: ignore  # noqa: PGH003
-        [1 if matched else 0 for matched in eval_dataset["matched"]],  # type: ignore  # noqa: PGH003
-        eval_dataset["latency"],  # type: ignore  # noqa: PGH003
-        tokenizer,
+
+    eval_dataset = LostItemSimilarityDataset(
+        file_path="./data/lost-item-similarity-dataset/test.jsonl",
+        tokenizer=tokenizer,
+        max_length=model.config.max_position_embeddings,
     )
+
+    data_collator = DataCollatorWithPadding(tokenizer)
 
     train(
         cfg,
@@ -73,15 +72,17 @@ def main(cfg: Any) -> None:
         model,
         train_dataset,
         eval_dataset,
+        data_collator,
     )
 
 
-def train(
+def train(  # noqa: PLR0913
     cfg: Any,
     tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast,
     model: ModernBertForSequenceClassificationWithScalar,
     train_dataset: dict[str, IterableDataset] | IterableDataset | Dataset | DatasetDict,
     eval_dataset: dict[str, IterableDataset] | IterableDataset | Dataset | DatasetDict,
+    data_collator: DataCollatorWithPadding,
 ) -> None:
     def compute_metrics(eval_pred: EvalPrediction) -> dict[str, float]:
         logits, labels = eval_pred
@@ -133,6 +134,7 @@ def train(
         args=training_args,
         train_dataset=train_dataset,  # type: ignore  # noqa: PGH003
         eval_dataset=eval_dataset,  # type: ignore  # noqa: PGH003
+        data_collator=data_collator,
         compute_metrics=compute_metrics,
     )
 
