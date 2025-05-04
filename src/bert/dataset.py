@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 import torch
-from datasets import Dataset
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
 
