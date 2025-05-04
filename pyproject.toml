@@ -6,16 +6,17 @@ authors = [
   { name = "shio", email = "85730998+dino3616@users.noreply.github.com" },
 ]
 dependencies = [
-    "evaluate==0.4.3",
-    "huggingface-hub==0.30.2",
-    "hydra-core==1.3.2",
-    "omegaconf==2.3.0",
-    "python-dotenv==1.1.0",
-    "schedulefree==1.4.1",
-    "scikit-learn==1.6.1",
-    "torch==2.7.0",
-    "transformers==4.51.3",
-    "wandb==0.19.10",
+  "accelerate==1.6.0",
+  "evaluate==0.4.3",
+  "huggingface-hub==0.30.2",
+  "hydra-core==1.3.2",
+  "omegaconf==2.3.0",
+  "python-dotenv==1.1.0",
+  "schedulefree==1.4.1",
+  "scikit-learn==1.6.1",
+  "torch==2.7.0",
+  "transformers==4.51.3",
+  "wandb==0.19.10",
 ]
 readme = "README.md"
 requires-python = "~=3.11"

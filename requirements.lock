@@ -10,6 +10,8 @@
 #   universal: false
 
 -e file:.
+accelerate==1.6.0
+    # via lockerai-reranking
 aiohappyeyeballs==2.4.6
     # via aiohttp
 aiohttp==3.11.12
@@ -59,6 +61,7 @@ gitdb==4.0.12
 gitpython==3.1.44
     # via wandb
 huggingface-hub==0.30.2
+    # via accelerate
     # via datasets
     # via evaluate
     # via lockerai-reranking
@@ -86,6 +89,7 @@ multiprocess==0.70.16
 networkx==3.4.2
     # via torch
 numpy==2.2.2
+    # via accelerate
     # via datasets
     # via evaluate
     # via pandas
@@ -96,6 +100,7 @@ omegaconf==2.3.0
     # via hydra-core
     # via lockerai-reranking
 packaging==24.2
+    # via accelerate
     # via datasets
     # via evaluate
     # via huggingface-hub
@@ -112,6 +117,7 @@ propcache==0.2.1
 protobuf==5.29.3
     # via wandb
 psutil==6.1.1
+    # via accelerate
     # via wandb
 pyarrow==19.0.0
     # via datasets
@@ -126,6 +132,7 @@ python-dotenv==1.1.0
 pytz==2025.1
     # via pandas
 pyyaml==6.0.2
+    # via accelerate
     # via datasets
     # via huggingface-hub
     # via omegaconf
@@ -140,6 +147,7 @@ requests==2.32.3
     # via transformers
     # via wandb
 safetensors==0.5.2
+    # via accelerate
     # via transformers
 schedulefree==1.4.1
     # via lockerai-reranking
@@ -165,6 +173,7 @@ threadpoolctl==3.6.0
 tokenizers==0.21.0
     # via transformers
 torch==2.7.0
+    # via accelerate
     # via lockerai-reranking
     # via schedulefree
 tqdm==4.67.1
