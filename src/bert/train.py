@@ -123,7 +123,7 @@ def train(  # noqa: PLR0913
         bf16=True,
         bf16_full_eval=True,
         group_by_length=True,
-        prediction_loss_only=True,
+        prediction_loss_only=False,
         metric_for_best_model="f1",
         load_best_model_at_end=True,
         report_to="wandb",
