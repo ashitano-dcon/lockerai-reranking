@@ -16,6 +16,7 @@ dependencies = [
   "peft==0.15.2",
   "python-dotenv==1.1.0",
   "schedulefree==1.4.1",
+  "scikit-learn==1.6.1",
   "torch==2.7.0",
   "tqdm==4.67.1",
   "transformers==4.51.3",
