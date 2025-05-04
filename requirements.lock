@@ -10,10 +10,6 @@
 #   universal: false
 
 -e file:.
-accelerate==1.6.0
-    # via lockerai-reranking
-    # via peft
-    # via trl
 aiohappyeyeballs==2.4.6
     # via aiohttp
 aiohttp==3.11.12
@@ -37,18 +33,12 @@ click==8.1.8
     # via wandb
 datasets==3.5.1
     # via evaluate
-    # via lockerai-reranking
-    # via trl
-deepspeed==0.16.7
-    # via lockerai-reranking
 dill==0.3.8
     # via datasets
     # via evaluate
     # via multiprocess
 docker-pycreds==0.4.0
     # via wandb
-einops==0.8.1
-    # via deepspeed
 evaluate==0.4.3
     # via lockerai-reranking
 filelock==3.17.0
@@ -68,14 +58,10 @@ gitdb==4.0.12
     # via gitpython
 gitpython==3.1.44
     # via wandb
-hjson==3.1.0
-    # via deepspeed
 huggingface-hub==0.30.2
-    # via accelerate
     # via datasets
     # via evaluate
     # via lockerai-reranking
-    # via peft
     # via tokenizers
     # via transformers
 hydra-core==1.3.2
@@ -87,16 +73,10 @@ jinja2==3.1.5
     # via torch
 joblib==1.4.2
     # via scikit-learn
-markdown-it-py==3.0.0
-    # via rich
 markupsafe==3.0.2
     # via jinja2
-mdurl==0.1.2
-    # via markdown-it-py
 mpmath==1.3.0
     # via sympy
-msgpack==1.1.0
-    # via deepspeed
 multidict==6.1.0
     # via aiohttp
     # via yarl
@@ -105,15 +85,10 @@ multiprocess==0.70.16
     # via evaluate
 networkx==3.4.2
     # via torch
-ninja==1.11.1.3
-    # via deepspeed
 numpy==2.2.2
-    # via accelerate
     # via datasets
-    # via deepspeed
     # via evaluate
     # via pandas
-    # via peft
     # via scikit-learn
     # via scipy
     # via transformers
@@ -121,19 +96,14 @@ omegaconf==2.3.0
     # via hydra-core
     # via lockerai-reranking
 packaging==24.2
-    # via accelerate
     # via datasets
-    # via deepspeed
     # via evaluate
     # via huggingface-hub
     # via hydra-core
-    # via peft
     # via transformers
 pandas==2.2.3
     # via datasets
     # via evaluate
-peft==0.15.2
-    # via lockerai-reranking
 platformdirs==4.3.6
     # via wandb
 propcache==0.2.1
@@ -142,21 +112,13 @@ propcache==0.2.1
 protobuf==5.29.3
     # via wandb
 psutil==6.1.1
-    # via accelerate
-    # via deepspeed
-    # via peft
     # via wandb
-py-cpuinfo==9.0.0
-    # via deepspeed
 pyarrow==19.0.0
     # via datasets
 pydantic==2.10.6
-    # via deepspeed
     # via wandb
 pydantic-core==2.27.2
     # via pydantic
-pygments==2.19.1
-    # via rich
 python-dateutil==2.9.0.post0
     # via pandas
 python-dotenv==1.1.0
@@ -164,11 +126,9 @@ python-dotenv==1.1.0
 pytz==2025.1
     # via pandas
 pyyaml==6.0.2
-    # via accelerate
     # via datasets
     # via huggingface-hub
     # via omegaconf
-    # via peft
     # via transformers
     # via wandb
 regex==2024.11.6
@@ -179,11 +139,7 @@ requests==2.32.3
     # via huggingface-hub
     # via transformers
     # via wandb
-rich==13.9.4
-    # via trl
 safetensors==0.5.2
-    # via accelerate
-    # via peft
     # via transformers
 schedulefree==1.4.1
     # via lockerai-reranking
@@ -209,24 +165,14 @@ threadpoolctl==3.6.0
 tokenizers==0.21.0
     # via transformers
 torch==2.7.0
-    # via accelerate
-    # via deepspeed
     # via lockerai-reranking
-    # via peft
     # via schedulefree
 tqdm==4.67.1
     # via datasets
-    # via deepspeed
     # via evaluate
     # via huggingface-hub
-    # via lockerai-reranking
-    # via peft
     # via transformers
 transformers==4.51.3
-    # via lockerai-reranking
-    # via peft
-    # via trl
-trl==0.17.0
     # via lockerai-reranking
 typing-extensions==4.12.2
     # via huggingface-hub
