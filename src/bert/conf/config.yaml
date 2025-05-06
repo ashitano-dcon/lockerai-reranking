@@ -7,6 +7,11 @@ model:
   save_dir: ${project_dir}/checkpoints/${model.name}
   classifier_pooling: mean
 
+inference:
+  model_path: ${model.save_dir}
+  host: "0.0.0.0"
+  port: 8000
+
 train:
   split: train
   attn_implementation: flash_attention
