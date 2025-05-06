@@ -35,7 +35,7 @@ class LostItemSimilarityDataset(Dataset):
         )
 
         label = 1 if item.get("matched", False) else 0
-        scalar = float(item.get("latency", 0.0))
+        scalar = float(item.get("normalized_latency", 0.0))
 
         return {
             "input_ids": torch.tensor(encoding["input_ids"], dtype=torch.long),
