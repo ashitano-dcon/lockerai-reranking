@@ -155,6 +155,10 @@ class ModernBertForSequenceClassificationWithScalar(ModernBertPreTrainedModel):
             if scalar.dim() == 1:
                 scalar = scalar.unsqueeze(-1)
             pooled_output_with_scalar = torch.cat([pooled_output, scalar], dim=1)
+        else:
+            raise ValueError(
+                "Scalar feature is required. Expected tensor of shape (batch_size,) or (batch_size, 1) containing numeric values like latency."  # noqa: E501
+            )
 
         logits = self.classifier(pooled_output_with_scalar)
 
