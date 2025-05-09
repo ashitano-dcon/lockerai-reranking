@@ -54,8 +54,7 @@ class ModelService:
                     revision=getattr(self.cfg.inference, "revision", None),
                     use_auth_token=token
                 )
-                device = self.device
-                model.to(device).eval()
+                model.to(self.device).eval()
                 self.model = model
                 self.tokenizer = AutoTokenizer.from_pretrained(
                     model_path,
@@ -69,12 +68,12 @@ class ModelService:
             config = AutoConfig.from_pretrained(model_path)
             model = ModernBertForSequenceClassificationWithScalar(config)
 
-            # find weight
+            # find weight file
             weight_file = None
             for fname in ("pytorch_model.safetensors", "pytorch_model.bin"):
-                p = os.path.join(model_path, fname)
-                if os.path.isfile(p):
-                    weight_file = p
+                candidate = os.path.join(model_path, fname)
+                if os.path.isfile(candidate):
+                    weight_file = candidate
                     break
             if weight_file is None:
                 raise FileNotFoundError(f"重みファイルが見つかりません: {model_path}")
@@ -97,40 +96,61 @@ class ModelService:
         if self.model is None or self.tokenizer is None:
             raise RuntimeError("モデルとトークナイザーがロードされていません。load_model() を先に実行してください。")
         text = description + self.tokenizer.sep_token + inquiry
-        enc = self.tokenizer(text,
-                             truncation=True,
-                             max_length=self.model.config.max_position_embeddings,
-                             padding="max_length",
-                             return_tensors="pt")
+        enc = self.tokenizer(
+            text,
+            truncation=True,
+            max_length=self.model.config.max_position_embeddings,
+            padding="max_length",
+            return_tensors="pt"
+        )
         scalar = torch.tensor([[latency]], dtype=torch.float).to(self.device)
         input_ids = enc["input_ids"].to(self.device)
         attention_mask = enc["attention_mask"].to(self.device)
         with torch.no_grad():
-            out = self.model(input_ids=input_ids,
-                             attention_mask=attention_mask,
-                             scalar=scalar)
+            out = self.model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                scalar=scalar
+            )
         probs = torch.nn.functional.softmax(out.logits, dim=1)[0].tolist()
         return {"data": tuple(probs)}
 
     def batch_predict(self, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """バッチをチャンクに分割してメモリ不足を回避しながら推論を行う"""
         if self.model is None or self.tokenizer is None:
             raise RuntimeError("モデルとトークナイザーがロードされていません。load_model() を先に実行してください。")
-        texts = [itm["description"] + self.tokenizer.sep_token + itm["inquiry"] for itm in items]
-        lat = [float(itm.get("latency", 0.0)) for itm in items]
-        encs = self.tokenizer(texts,
-                               truncation=True,
-                               max_length=self.model.config.max_position_embeddings,
-                               padding="max_length",
-                               return_tensors="pt")
-        scalars = torch.tensor(lat, dtype=torch.float).view(len(items),1).to(self.device)
-        input_ids = encs["input_ids"].to(self.device)
-        attention_mask = encs["attention_mask"].to(self.device)
-        with torch.no_grad():
-            out = self.model(input_ids=input_ids,
-                             attention_mask=attention_mask,
-                             scalar=scalars)
-        probs = torch.nn.functional.softmax(out.logits, dim=1)
-        return [{"data": tuple(probs[i].tolist())} for i in range(len(items))]
+        # チャンクサイズは設定またはデフォルト8
+        batch_size = getattr(self.cfg.inference, "batch_size", 8)
+        results: list[dict[str, Any]] = []
+
+        for i in range(0, len(items), batch_size):
+            chunk = items[i:i + batch_size]
+            texts = [itm["description"] + self.tokenizer.sep_token + itm["inquiry"] for itm in chunk]
+            latencies = [float(itm.get("latency", 0.0)) for itm in chunk]
+
+            encs = self.tokenizer(
+                texts,
+                truncation=True,
+                max_length=self.model.config.max_position_embeddings,
+                padding="max_length",
+                return_tensors="pt"
+            )
+            scalars = torch.tensor(latencies, dtype=torch.float).view(len(chunk), 1).to(self.device)
+            input_ids = encs["input_ids"].to(self.device)
+            attention_mask = encs["attention_mask"].to(self.device)
+
+            with torch.no_grad():
+                out = self.model(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    scalar=scalars
+                )
+            probs = torch.nn.functional.softmax(out.logits, dim=1)
+
+            for idx in range(len(chunk)):
+                results.append({"data": tuple(probs[idx].tolist())})
+
+        return results
 
 # FastAPI setup
 app = FastAPI(title="LockerAI Reranking API", description="ModernBERT based reranking API")
