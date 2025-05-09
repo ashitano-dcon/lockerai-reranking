@@ -7,13 +7,6 @@ from typing import Any
 # ngrok 接続用
 from pyngrok import ngrok
 
-# ngrok auth token を環境変数から設定
-auth_token = os.getenv("NGROKAUTH_TOKEN")
-if auth_token:
-    ngrok.set_auth_token(auth_token)
-else:
-    logger.warning("環境変数 NGROK_AUTH_TOKEN が設定されていません。無料トンネルはすぐに切断される可能性があります。")
-
 from fastapi import Depends, FastAPI, HTTPException
 from omegaconf import OmegaConf
 from pydantic import BaseModel
