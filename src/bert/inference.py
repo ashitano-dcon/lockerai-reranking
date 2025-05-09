@@ -1,8 +1,12 @@
-import logging
 import os
+import logging
 import torch
 import hydra
 from typing import Any
+
+# 環境変数をスクリプト内で設定
+os.environ["PROJECT_DIR"] = os.getcwd()
+os.environ["HYDRA_FULL_ERROR"] = "1"
 
 from fastapi import Depends, FastAPI, HTTPException
 from omegaconf import OmegaConf
@@ -98,10 +102,9 @@ class ModelService:
                              max_length=self.model.config.max_position_embeddings,
                              padding="max_length",
                              return_tensors="pt")
-        scalar = torch.tensor([[latency]], dtype=torch.float)
+        scalar = torch.tensor([[latency]], dtype=torch.float).to(self.device)
         input_ids = enc["input_ids"].to(self.device)
         attention_mask = enc["attention_mask"].to(self.device)
-        scalar = scalar.to(self.device)
         with torch.no_grad():
             out = self.model(input_ids=input_ids,
                              attention_mask=attention_mask,
