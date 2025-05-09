@@ -11,6 +11,7 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 from torch.utils.data import DataLoader
 from safetensors.torch import save_file
+from .modeling import ModernBertForSequenceClassificationWithScalar
 
 def load_and_prepare_data(data_path, model_name, max_len=512):
     """データの読み込み、トークン化、DataLoaderの準備"""
@@ -44,37 +45,20 @@ def load_and_prepare_data(data_path, model_name, max_len=512):
     
     return calib_loader, train_loader
 
-class RerankModel(nn.Module):
-    """リランキングのためのBERTモデルとカスタムヘッド"""
-    def __init__(self, enc, hid):
-        super().__init__()
-        self.enc = enc
-        self.head = nn.Linear(hid, 1)
-    
-    def forward(self, input_ids, attention_mask, position_ids):
-        out = self.enc(input_ids=input_ids,
-                     attention_mask=attention_mask,
-                     position_ids=position_ids)
-        cls = out.last_hidden_state[:,0,:]
-        return self.head(cls)
-
 def setup_model(model_name, device):
     """量子化のためのモデルの初期化と設定"""
     config = AutoConfig.from_pretrained(model_name)
     hidden_sz = config.hidden_size
-    
-    # ModernBERT with absolute positions by default in eager mode
-    backbone = AutoModel.from_pretrained(model_name).to(device)
+
+    # ModernBertForSequenceClassificationWithScalar を使う
+    model = ModernBertForSequenceClassificationWithScalar.from_pretrained(model_name).to(device)
 
     # 埋め込み層を凍結＆量子化対象外
-    for m in backbone.modules():
+    for m in model.modules():
         if isinstance(m, nn.Embedding):
             m.requires_grad_(False)
             m.qconfig = None
 
-    # CLSヘッドを自作
-    model = RerankModel(backbone, hidden_sz).to(device)
-    
     # Linear層のチャネル重要度マスク (上位50%のみ更新)
     linear_masks = {}
     for name, m in model.named_modules():
@@ -89,7 +73,6 @@ def setup_model(model_name, device):
 
 def prepare_qat_model(model, calib_loader, device):
     """QATのためのモデル準備とキャリブレーション実行"""
-    # モデルを train() にし、埋め込み以外の層には qconfig を設定
     model.qconfig = tq.get_default_qat_qconfig('fbgemm')
     tq.prepare_qat(model, inplace=True)
     
@@ -98,6 +81,8 @@ def prepare_qat_model(model, calib_loader, device):
     with torch.inference_mode():
         for batch in calib_loader:
             inp = {k: batch[k].to(device) for k in ("input_ids","attention_mask","position_ids")}
+            # scalar をダミーで渡す (全て1)
+            inp["scalar"] = torch.ones(inp["input_ids"].size(0), 1, device=device)
             _ = model(**inp)
     print("Calibration done (eager fake-quant observers updated)")
     
@@ -119,9 +104,16 @@ def train_model(model, train_loader, linear_masks, device, epochs=1, sub_bs=4):
                     k: batch[k][i:i+sub_bs].to(device)
                     for k in ("input_ids","attention_mask","position_ids")
                 }
+                # ModernBertForSequenceClassificationWithScalar 用に scalar を渡す
+                sub_batch["scalar"] = torch.ones(sub_batch["input_ids"].size(0), 1, device=device)
                 target = torch.ones((sub_batch["input_ids"].size(0),1), device=device)
                 out = model(**sub_batch)
-                loss = F.mse_loss(out, target, reduction='mean')
+                # ModernBertForSequenceClassificationWithScalar の場合、出力は logits
+                if isinstance(out, tuple):
+                    logits = out[0]
+                else:
+                    logits = out.logits
+                loss = F.mse_loss(logits, target, reduction='mean')
                 loss.backward()  # マイクロバッチごとに逆伝播
                 total_loss += loss.item()
             
