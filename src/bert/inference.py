@@ -13,7 +13,7 @@ from omegaconf import OmegaConf
 from pydantic import BaseModel
 from transformers import AutoConfig, AutoTokenizer
 from safetensors.torch import load_file as load_safetensor
-from torch.amp import autocast
+from torch.cuda.amp import autocast
 
 from .modeling import ModernBertForSequenceClassificationWithScalar
 
@@ -96,8 +96,7 @@ class ModelService:
         attention_mask = enc["attention_mask"].to(self.device)
         scalar = torch.tensor([[latency]], dtype=torch.float, device=self.device)
 
-        # autocast の新 API を使用
-        with torch.no_grad(), autocast(device_type=self.device.type):
+        with torch.no_grad(), autocast(self.device.type):
             out = self.model(input_ids=input_ids, attention_mask=attention_mask, scalar=scalar)
             probs = torch.nn.functional.softmax(out.logits, dim=1)[0]
         return {"data": (float(probs[0]), float(probs[1]))}
@@ -118,7 +117,7 @@ class ModelService:
             attention_mask = enc["attention_mask"].to(self.device)
             scalars = torch.tensor(lat, dtype=torch.float, device=self.device).view(-1,1)
 
-            with torch.no_grad(), autocast(device_type=self.device.type):
+            with torch.no_grad(), autocast(self.device.type):
                 out = self.model(input_ids=input_ids, attention_mask=attention_mask, scalar=scalars)
                 probs = torch.nn.functional.softmax(out.logits, dim=1)
 
@@ -146,7 +145,7 @@ async def api_predict(req: InferenceRequest, svc: ModelService = Depends(get_mod
         return PredictionResponse(data=(0.0,0.0), error=str(e))
 
 @app.post("/batch_predict", response_model=list[PredictionResponse])
-async def api_batch(reqs: list[InferenceRequest], svc: ModelService = Depends(get_model_service)) -> list[PredictionResponse]:
+async def api_batch(reqs: list[InferenceRequest], svc: ModelService = Depends(get_model_service)):
     try:
         items = [r.model_dump() for r in reqs]
         out = svc.batch_predict(items)
@@ -155,7 +154,7 @@ async def api_batch(reqs: list[InferenceRequest], svc: ModelService = Depends(ge
         raise HTTPException(status_code=500, detail=str(e))
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
-def main(cfg: Any) -> None:
+def main(cfg: Any):
     global model_service
     logger.info(OmegaConf.to_yaml(cfg))
     model_service = ModelService(cfg)
